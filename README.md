@@ -2,7 +2,7 @@
 
 **Inference-time Generate–Verify–Repair for improving small language-model outputs.**
 
-Verify-Repair LM is a lightweight inference-time wrapper around a language model. It does not train or modify the base model. Instead, it improves single-shot generation by creating prompt variants, generating several candidate answers, verifying them with task-specific checks, repairing detected failures when possible, and selecting the best final answer.
+Verify-Repair LM is a lightweight inference-time wrapper around a language model. It does not train or modify the base model. Instead, it improves single-shot generation by creating prompt variants, generating candidate answers, verifying them with task-specific checks, repairing detected failures when possible, and selecting the best final answer.
 
 The goal is simple:
 
@@ -21,7 +21,7 @@ user prompt
   -> final selected answer
 ```
 
-This project is designed for small or self-hosted language models, where greedy decoding can be unreliable but running a larger frontier model may be too expensive or undesirable.
+This project is designed for small or self-hosted language models, where greedy decoding can be unreliable and running a larger frontier model may be too expensive or undesirable.
 
 ---
 
@@ -29,22 +29,22 @@ This project is designed for small or self-hosted language models, where greedy 
 
 Let `x` be the user prompt and let `f_theta` be the base language model.
 
-Instead of generating one answer,
+Instead of generating one greedy answer,
 
 ```math
-y_greedy = f_theta(x),
+y_{\mathrm{greedy}} = f_{\theta}(x),
 ```
 
 the system creates several prompt variants,
 
 ```math
-x_1, x_2, ..., x_M,
+x_1, x_2, \ldots, x_M,
 ```
 
 and generates candidate answers,
 
 ```math
-C(x) = { y_{m,k} : y_{m,k} ~ f_theta(x_m) }.
+C(x) = \{ y_{m,k} : y_{m,k} \sim f_{\theta}(x_m) \}.
 ```
 
 Each candidate is evaluated by a verifier loss,
@@ -52,17 +52,17 @@ Each candidate is evaluated by a verifier loss,
 ```math
 L(y; x)
 =
-lambda_1 L_coverage(y; x)
-+ lambda_2 L_semantic(y; x)
-+ lambda_3 L_repetition(y)
-+ lambda_4 L_format(y)
-+ lambda_5 L_task(y; x).
+\lambda_1 L_{\mathrm{coverage}}(y; x)
++ \lambda_2 L_{\mathrm{semantic}}(y; x)
++ \lambda_3 L_{\mathrm{repetition}}(y)
++ \lambda_4 L_{\mathrm{format}}(y)
++ \lambda_5 L_{\mathrm{task}}(y; x).
 ```
 
 The final answer is selected by
 
 ```math
-y_star = argmin_{y in C(x) union R(x)} L(y; x),
+y^\star = \arg\min_{y \in C(x) \cup R(x)} L(y; x),
 ```
 
 where `R(x)` is the set of repaired or synthesized answers created when the best candidate still violates the verifier.
@@ -70,7 +70,7 @@ where `R(x)` is the set of repaired or synthesized answers created when the best
 Equivalently, using a quality score `Q(y; x) = -L(y; x)`,
 
 ```math
-y_star = argmax_{y in C(x) union R(x)} Q(y; x).
+y^\star = \arg\max_{y \in C(x) \cup R(x)} Q(y; x).
 ```
 
 ---
@@ -79,7 +79,7 @@ y_star = argmax_{y in C(x) union R(x)} Q(y; x).
 
 ### 1. Prompt variants
 
-The original user prompt is rewritten into several variants. Each variant emphasizes a different objective, such as direct answer, technical correctness, business relevance, risks and mitigations, or final structured response.
+The original user prompt is rewritten into several variants. Each variant emphasizes a different objective, such as directness, technical correctness, business relevance, risk analysis, or structured final response.
 
 ### 2. Candidate generation
 
@@ -87,15 +87,32 @@ The same base model generates answers from each prompt variant.
 
 ### 3. Verification
 
-Each answer is scored using task-specific and generic checks.
+Each answer is scored using generic and task-specific checks.
 
-Generic checks include prompt coverage, repetition, role leakage, code leakage, prompt copying, answer length, and structural quality.
+Generic checks include:
+
+- prompt coverage
+- repetition
+- role leakage
+- code leakage
+- prompt copying
+- answer length
+- structural quality
+
+Task-specific checks depend on the prompt category.
 
 ### 4. Repair or synthesis
 
-If the best candidate is still weak, the system creates a repaired answer.
+If the best candidate is still weak, the system creates a repaired or synthesized answer.
 
-For example, in the speculative-decoding task, the verifier checks whether the answer correctly explains draft model, target model, target-model verification, accepted text tokens, why high token acceptance improves speed, and fallback risks.
+For example, in a speculative-decoding explanation task, the verifier checks whether the answer correctly explains:
+
+- the draft model
+- the target model
+- target-model verification
+- accepted text tokens
+- why high token acceptance improves speed
+- fallback risks
 
 ### 5. Final selection
 
@@ -162,7 +179,7 @@ MODEL_NAME=Qwen/Qwen2.5-1.5B-Instruct python scripts/prompt_ensemble_benchmark.p
 
 ## Pilot evidence
 
-A pilot benchmark was run with:
+A pilot benchmark was run with the following setup:
 
 | Setting | Value |
 |---|---:|
@@ -230,14 +247,14 @@ This project currently supports the following limited claim:
 
 This project does **not** claim that it:
 
-- makes any model generally intelligent,
-- guarantees better answers for arbitrary prompts,
-- beats frontier systems such as ChatGPT or Claude,
-- proves human-preference improvement,
-- eliminates hallucinations,
-- solves factuality without task-specific verification.
+- makes any model generally intelligent
+- guarantees better answers for arbitrary prompts
+- beats frontier systems such as ChatGPT or Claude
+- proves human-preference improvement
+- eliminates hallucinations
+- solves factuality without task-specific verification
 
-The current prototype is best understood as an inference-time reliability wrapper for small language models.
+The current prototype should be understood as an inference-time reliability wrapper for small language models.
 
 ---
 
@@ -266,7 +283,7 @@ verify-repair-lm/
 
 ---
 
-## Next step
+## Next milestone
 
 The next milestone is human evaluation.
 
@@ -275,10 +292,10 @@ For each prompt, compare:
 ```text
 greedy answer
 vs
-final generate–verify–repair answer
+final Generate–Verify–Repair answer
 ```
 
-and label:
+and label the result as one of:
 
 ```text
 greedy_better
@@ -299,7 +316,15 @@ The project becomes stronger if the internal verifier score correlates with huma
 
 ## Related ideas
 
-This project is related to Best-of-N generation, self-consistency, verifier reranking, Self-Refine, Reflexion, Tree of Thoughts, and inference-time scaling.
+This project is related to:
+
+- Best-of-N generation
+- self-consistency
+- verifier reranking
+- Self-Refine
+- Reflexion
+- Tree of Thoughts
+- inference-time scaling
 
 The practical focus here is narrower:
 
@@ -315,4 +340,3 @@ small model
 
 ## License
 
-Add your preferred license here.
