@@ -1,0 +1,7 @@
+{"task_mode":"spec_decode","prompt":"Explain speculative decoding clearly to a startup founder. Focus on why high token acceptance matters for speed."}
+{"task_mode":"spec_decode","prompt":"Explain why low token acceptance can make speculative decoding slower instead of faster."}
+{"task_mode":"spec_decode","prompt":"Give a practical startup example of using speculative decoding to reduce LLM serving cost."}
+{"task_mode":"generic","prompt":"Explain KV cache in transformer inference in simple terms."}
+{"task_mode":"generic","prompt":"Explain the difference between latency and throughput for an AI startup serving LLMs."}
+{"task_mode":"email","prompt":"Write a polite email asking my colleague to review the attached draft by Friday."}
+{"task_mode":"code","prompt":"Write a Python function that reads a JSON file safely and returns an empty dict if the file is missing."}

@@ -1,0 +1,2 @@
+prompt_id,task_mode,prompt,greedy_answer,final_answer,verifier_winner,human_winner,human_notes
+0,spec_decode,Explain speculative decoding clearly to a startup founder. Focus on why high token acceptance matters for speed.,,final,final,,
